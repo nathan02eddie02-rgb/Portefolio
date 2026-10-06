@@ -8,11 +8,11 @@
 
 html {
   scroll-behavior: smooth;
-  font-size: 18px;
+  font-size: 17px;
 }
 @media (max-width: 640px) {
   html {
-    font-size: 16.5px;
+    font-size: 16px;
   }
 }
 
@@ -44,9 +44,9 @@ body {
 /* Conteneur large : marges latérales réduites */
 .container-x {
   width: 100%;
-  max-width: 1480px;
+  max-width: 1560px;
   margin-inline: auto;
-  padding-inline: clamp(1rem, 2.6vw, 2.25rem);
+  padding-inline: clamp(0.875rem, 2vw, 1.75rem);
 }
 
 /* ---------- Cartes « verre ardoise » ---------- */
@@ -413,4 +413,14 @@ body {
   .dash-bg {
     opacity: 0.45;
   }
+}
+
+/* ---------- Titres de sections : couleur distinctive ---------- */
+.section-title {
+  display: inline-block;
+  padding-bottom: 0.08em; /* évite de couper le bas des lettres (p, g…) */
+  background: linear-gradient(90deg, #4DB3FF 0%, #8B8CF8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
