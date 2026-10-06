@@ -1,4 +1,5 @@
 import { TechIcon } from "@/components/TechIcon";
+import Reveal from "@/components/Reveal";
 
 /** Deux rangées (technologies différentes sur chacune, comme la référence), répétées pour boucler. */
 function buildRows(names: string[]) {
@@ -21,8 +22,8 @@ export default function TechMarquee({ names }: { names: string[] }) {
   return (
     <div className="space-y-2">
       {rows.map((list, r) => (
+        <Reveal key={r} delay={r * 180} variant={r % 2 === 0 ? "left" : "right"}>
         <div
-          key={r}
           className="marquee-row overflow-hidden py-4 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]"
         >
           <div
@@ -37,6 +38,7 @@ export default function TechMarquee({ names }: { names: string[] }) {
             ))}
           </div>
         </div>
+        </Reveal>
       ))}
     </div>
   );

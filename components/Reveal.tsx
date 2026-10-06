@@ -2,18 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 
+type Variant = "up" | "left" | "right" | "zoom";
+
 /**
- * Fait apparaître son contenu en fondu + léger décalage vertical
- * quand il entre dans le viewport (une seule fois).
+ * Fait apparaître son contenu quand le défilement l'atteint (une seule fois) :
+ * fondu + léger flou qui se dissipe + déplacement selon `variant`.
+ * `delay` (ms) permet d'enchaîner les éléments en cascade.
  */
 export default function Reveal({
   children,
   className = "",
-  delay = 0
+  delay = 0,
+  variant = "up"
 }: {
   children: React.ReactNode;
   className?: string;
   delay?: number;
+  variant?: Variant;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -21,26 +26,52 @@ export default function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+
+    // Animations réduites demandées par l'appareil : on affiche tout de suite.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setVisible(true);
+      return;
+    }
+
+    // Affiché dès que l'élément est atteint (ou déjà dépassé) par le défilement.
+    // Plus fiable qu'un simple « est-il visible ? » : un élément traversé trop vite
+    // (défilement rapide, appareil lent, clic sur un lien du menu) ne reste jamais caché.
+    let frame = 0;
+    let done = false;
+
+    const stop = () => {
+      done = true;
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (frame) cancelAnimationFrame(frame);
+    };
+
+    function check() {
+      frame = 0;
+      if (done || !el) return;
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
+        setVisible(true);
+        stop();
+      }
+    }
+
+    function schedule() {
+      if (!frame) frame = requestAnimationFrame(check);
+    }
+
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    check();
+    return stop;
   }, []);
 
   return (
     <div
       ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-700 ease-out ${
-        visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-      } ${className}`}
+      data-reveal={variant}
+      data-visible={visible ? "true" : "false"}
+      style={{ transitionDelay: visible ? `${delay}ms` : "0ms" }}
+      className={`reveal ${className}`}
     >
       {children}
     </div>

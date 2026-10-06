@@ -90,7 +90,7 @@ function pickBalanced(byCategory: Record<string, Skill[]>, max: number) {
 function SectionHeading({ title, subtitle, center = false }: { title: string; subtitle?: string; center?: boolean }) {
   return (
     <div className={center ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
-      <h2 className="font-display text-3xl font-bold tracking-tight text-text sm:text-4xl">{title}</h2>
+      <h2 className="section-title font-display text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
       {subtitle && <p className="mt-3 text-base leading-relaxed text-muted">{subtitle}</p>}
     </div>
   );
@@ -260,13 +260,14 @@ export default async function Home() {
       {/* ================= À propos (centré) ================= */}
       <section id="about" className="w-full border-b border-line">
         <div className="container-x py-24">
-          <Reveal>
-            <div className="mx-auto max-w-3xl text-center">
-              <h2 className="font-display text-3xl font-bold tracking-tight text-text sm:text-4xl">À propos</h2>
+          <div className="mx-auto max-w-3xl text-center">
+            <Reveal>
+              <h2 className="section-title font-display text-3xl font-bold tracking-tight sm:text-4xl">À propos</h2>
               <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-sky-400 to-indigo-400" />
-              {bioParagraphs.map((para, i) => (
+            </Reveal>
+            {bioParagraphs.map((para, i) => (
+              <Reveal key={i} delay={150 + i * 150}>
                 <p
-                  key={i}
                   className={
                     i === 0
                       ? "mt-8 text-xl leading-relaxed text-text"
@@ -275,9 +276,9 @@ export default async function Home() {
                 >
                   {para}
                 </p>
-              ))}
-            </div>
-          </Reveal>
+              </Reveal>
+            ))}
+          </div>
 
           {infoCards.length > 0 && (
             <div className="mx-auto mt-14 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -299,7 +300,7 @@ export default async function Home() {
                 );
                 const cls = "group glass glass-hover flex h-full flex-col items-center gap-2 rounded-2xl p-6 text-center";
                 return (
-                  <Reveal key={card.key} delay={i * 80}>
+                  <Reveal key={card.key} delay={i * 130} variant="zoom">
                     {card.href ? (
                       <a href={card.href} target="_blank" className={cls}>
                         {content}
@@ -337,7 +338,7 @@ export default async function Home() {
       {/* ================= Compétences par domaine : fiche technique ================= */}
       <section id="skills" className="w-full border-b border-line">
         <div className="container-x grid gap-12 py-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.3fr)] lg:items-start">
-          <Reveal className="lg:sticky lg:top-28">
+          <Reveal className="lg:sticky lg:top-28" variant="left">
             <SectionHeading
               title="Compétences par domaine"
               subtitle="Business Intelligence, ingénierie des données, langages et visualisation."
@@ -359,7 +360,7 @@ export default async function Home() {
             {Object.entries(skillsByCategory).map(([category, items], i) => {
               const accent = ACCENTS[i % ACCENTS.length];
               return (
-                <Reveal key={category} delay={i * 80} className="border-b border-line last:border-b-0">
+                <Reveal key={category} delay={i * 140} variant="right" className="border-b border-line last:border-b-0">
                   <div className="group relative grid gap-4 px-7 py-6 transition-colors hover:bg-white/[0.03] sm:grid-cols-[14rem_minmax(0,1fr)] sm:items-center">
                     <span
                       className={`absolute inset-y-3 left-0 w-1 rounded-r-full ${accent.bar} opacity-50 transition-all duration-300 group-hover:inset-y-0 group-hover:opacity-100`}
@@ -406,7 +407,7 @@ export default async function Home() {
               const hasPreview = Boolean(proj.report_url || proj.image_url);
 
               return (
-                <Reveal key={proj.id} delay={i * 60}>
+                <Reveal key={proj.id} delay={i * 120}>
                   <article className="glass glass-hover overflow-hidden rounded-3xl">
                     <div className={`grid gap-8 p-7 ${hasPreview ? "lg:grid-cols-5" : ""}`}>
                       <div className={hasPreview ? "lg:col-span-3" : ""}>
@@ -443,10 +444,8 @@ export default async function Home() {
                         {kpis.length > 0 && (
                           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
                             {kpis.map((k, idx) => (
-                              <div
-                                key={`${k.label}-${idx}`}
-                                className="tile-hover cursor-default rounded-xl border border-line bg-ink/40 p-3.5"
-                              >
+                              <Reveal key={`${k.label}-${idx}`} delay={250 + idx * 120} variant="zoom">
+                              <div className="tile-hover h-full cursor-default rounded-xl border border-line bg-ink/40 p-3.5">
                                 {k.value ? (
                                   <>
                                     <p className="gradient-text font-display text-xl font-bold leading-tight">{k.value}</p>
@@ -456,6 +455,7 @@ export default async function Home() {
                                   <p className="text-sm text-slate-300">{k.label}</p>
                                 )}
                               </div>
+                              </Reveal>
                             ))}
                           </div>
                         )}
@@ -496,7 +496,7 @@ export default async function Home() {
                       </div>
 
                       {hasPreview && (
-                        <div className="lg:col-span-2">
+                        <Reveal delay={200} variant="right" className="lg:col-span-2">
                           {proj.report_url ? (
                             <ReportEmbed url={proj.report_url} title={proj.title} imageUrl={proj.image_url} />
                           ) : (
@@ -504,7 +504,7 @@ export default async function Home() {
                               <ZoomImage src={proj.image_url!} alt={proj.title} className="h-[320px] w-full object-cover" />
                             </div>
                           )}
-                        </div>
+                        </Reveal>
                       )}
                     </div>
                   </article>
@@ -527,7 +527,7 @@ export default async function Home() {
 
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             {architectureList.map((a, i) => (
-              <Reveal key={a.id} delay={i * 80}>
+              <Reveal key={a.id} delay={i * 120} variant={i % 2 === 0 ? "left" : "right"}>
                 <article className="glass glass-hover h-full overflow-hidden rounded-3xl">
                   <div className="h-60 overflow-hidden border-b border-line bg-ink/40">
                     {a.image_url ? (
@@ -582,11 +582,14 @@ export default async function Home() {
                 ]
               ] as const
             ).map(([heading, items]) => (
-              <Reveal key={heading}>
-                <h3 className="font-display text-xl font-semibold text-text">{heading}</h3>
+              <div key={heading}>
+                <Reveal>
+                  <h3 className="font-display text-xl font-semibold text-text">{heading}</h3>
+                </Reveal>
                 <div className="relative mt-6 space-y-5 border-l-2 border-line pl-6">
-                  {items.map((it) => (
-                    <div key={it.id} className="group glass glass-hover relative rounded-2xl p-5">
+                  {items.map((it, idx) => (
+                    <Reveal key={it.id} delay={idx * 150} variant={heading === "Expérience" ? "left" : "right"}>
+                    <div className="group glass glass-hover relative rounded-2xl p-5">
                       <span className="absolute -left-[33px] top-6 h-3 w-3 rounded-full bg-gradient-to-br from-sky-400 to-indigo-400 ring-4 ring-ink transition duration-300 group-hover:scale-[1.7]" />
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
                         <h4 className="font-semibold text-text transition-colors group-hover:text-pbi">{it.title}</h4>
@@ -595,9 +598,10 @@ export default async function Home() {
                       <p className="mt-0.5 text-sm font-medium text-sky-300">{it.org}</p>
                       {it.desc && <p className="mt-2 text-sm leading-relaxed text-muted">{it.desc}</p>}
                     </div>
+                    </Reveal>
                   ))}
                 </div>
-              </Reveal>
+              </div>
             ))}
           </div>
         </div>
@@ -611,7 +615,7 @@ export default async function Home() {
           </Reveal>
           <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {certificateList.map((c, i) => (
-              <Reveal key={c.id} delay={i * 50}>
+              <Reveal key={c.id} delay={i * 100} variant="zoom">
                 <a
                   href={c.credential_url || undefined}
                   target="_blank"
@@ -644,7 +648,7 @@ export default async function Home() {
         <div className="aurora" aria-hidden="true" />
         <div className="container-x relative py-28 text-center">
           <Reveal>
-            <h2 className="mx-auto max-w-2xl font-display text-3xl font-extrabold tracking-tight text-text sm:text-5xl">
+            <h2 className="section-title mx-auto max-w-2xl font-display text-3xl font-extrabold tracking-tight sm:text-5xl">
               Transformons vos données en décisions.
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-base text-slate-300">
