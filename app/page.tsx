@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type {
   Certificate,
   Education,
@@ -13,10 +13,14 @@ import MobileMenu from "@/components/MobileMenu";
 import ArchitectureFlow from "@/components/ArchitectureFlow";
 import ReportEmbed from "@/components/ReportEmbed";
 import ZoomImage from "@/components/ZoomImage";
+import SmartImage from "@/components/SmartImage";
 import HeroDashboardBg from "@/components/HeroDashboardBg";
 import { TechIcon } from "@/components/TechIcon";
 
-export const revalidate = 0;
+// Page générée à l'avance et mise en cache. Elle est régénérée immédiatement
+// à chaque modification faite dans l'admin (revalidatePath("/") dans les actions),
+// et au plus tard toutes les heures par sécurité.
+export const revalidate = 3600;
 
 // Nombre maximum de technologies dans le bandeau défilant, et de badges dans le hero.
 const MAX_TECH = 12;
@@ -94,7 +98,7 @@ function SectionHeading({ title, subtitle, center = true }: { title: string; sub
 }
 
 export default async function Home() {
-  const supabase = createClient();
+  const supabase = createPublicClient();
 
   const [
     { data: profile },
@@ -232,11 +236,16 @@ export default async function Home() {
           <div className="fade-up glass rounded-3xl p-6" style={{ animationDelay: "250ms" }}>
             {p?.avatar_url && (
               <div className="avatar-frame mx-auto mb-6 w-full max-w-[23rem] rounded-3xl bg-gradient-to-br from-sky-400 via-indigo-400 to-emerald-400 p-[3px]">
-                <img
-                  src={p.avatar_url}
-                  alt={p.full_name}
-                  className="aspect-square w-full rounded-[21px] object-cover"
-                />
+                <div className="relative aspect-square w-full overflow-hidden rounded-[21px]">
+                  <SmartImage
+                    src={p.avatar_url}
+                    alt={p.full_name}
+                    fill
+                    priority
+                    sizes="(max-width: 1023px) 90vw, 320px"
+                    className="object-cover"
+                  />
+                </div>
               </div>
             )}
             <div className="grid grid-cols-3 gap-3 text-center">
@@ -481,7 +490,7 @@ export default async function Home() {
                             <ReportEmbed url={proj.report_url} title={proj.title} imageUrl={proj.image_url} />
                           ) : (
                             <div className="overflow-hidden rounded-xl border border-line">
-                              <ZoomImage src={proj.image_url!} alt={proj.title} className="h-[320px] w-full object-cover" />
+                              <ZoomImage src={proj.image_url!} alt={proj.title} className="h-[320px]" imgClassName="object-cover" />
                             </div>
                           )}
                         </Reveal>
@@ -567,9 +576,12 @@ export default async function Home() {
                   className="group glass glass-hover flex h-full flex-col items-center gap-3 rounded-2xl p-5 text-center"
                 >
                   {c.badge_url ? (
-                    <img
+                    <SmartImage
                       src={c.badge_url}
                       alt={c.name}
+                      width={112}
+                      height={112}
+                      sizes="56px"
                       className="h-14 w-14 object-contain transition duration-300 group-hover:-rotate-6 group-hover:scale-125"
                     />
                   ) : (

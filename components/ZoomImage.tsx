@@ -1,16 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SmartImage from "@/components/SmartImage";
 
-/** Miniature cliquable qui s'ouvre en plein écran (Échap ou clic pour fermer). */
+/**
+ * Miniature cliquable (optimisée) qui s'ouvre en plein écran (Échap ou clic pour fermer).
+ * className : taille du cadre (ex. "h-[320px]") ; imgClassName : ajustement de l'image.
+ */
 export default function ZoomImage({
   src,
   alt,
-  className = ""
+  className = "",
+  imgClassName = "object-cover",
+  sizes = "(max-width: 1023px) 100vw, 480px"
 }: {
   src: string;
   alt: string;
   className?: string;
+  imgClassName?: string;
+  sizes?: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -29,9 +37,15 @@ export default function ZoomImage({
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`Agrandir : ${alt}`}
-        className="group block w-full cursor-zoom-in overflow-hidden"
+        className={`group relative block w-full cursor-zoom-in overflow-hidden ${className}`}
       >
-        <img src={src} alt={alt} className={`${className} transition duration-500 group-hover:scale-105`} />
+        <SmartImage
+          src={src}
+          alt={alt}
+          fill
+          sizes={sizes}
+          className={`${imgClassName} transition duration-500 group-hover:scale-105`}
+        />
       </button>
 
       {open && (
@@ -41,6 +55,8 @@ export default function ZoomImage({
           onClick={() => setOpen(false)}
           className="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/85 p-6 backdrop-blur-sm"
         >
+          {/* image d'origine, chargée seulement à l'ouverture */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={src} alt={alt} className="max-h-full max-w-full rounded-lg shadow-2xl" />
         </div>
       )}

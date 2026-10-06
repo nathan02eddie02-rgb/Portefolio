@@ -4,10 +4,43 @@ import { useEffect, useRef, useState } from "react";
 
 type Variant = "up" | "left" | "right" | "zoom";
 
+/* Un seul écouteur de défilement partagé par tous les éléments Reveal de la page :
+   les vérifications sont regroupées une fois par image affichée (requestAnimationFrame). */
+const pending = new Set<() => boolean>();
+let frame = 0;
+let listening = false;
+
+function runChecks() {
+  frame = 0;
+  pending.forEach((check) => {
+    if (check()) pending.delete(check);
+  });
+  if (pending.size === 0) stopListening();
+}
+
+function schedule() {
+  if (!frame) frame = requestAnimationFrame(runChecks);
+}
+
+function startListening() {
+  if (listening) return;
+  listening = true;
+  window.addEventListener("scroll", schedule, { passive: true });
+  window.addEventListener("resize", schedule);
+}
+
+function stopListening() {
+  if (!listening) return;
+  listening = false;
+  window.removeEventListener("scroll", schedule);
+  window.removeEventListener("resize", schedule);
+}
+
 /**
  * Fait apparaître son contenu quand le défilement l'atteint (une seule fois) :
- * fondu + léger flou qui se dissipe + déplacement selon `variant`.
+ * fondu + léger flou qui se dissipe (sur ordinateur) + déplacement selon `variant`.
  * `delay` (ms) permet d'enchaîner les éléments en cascade.
+ * Un élément atteint ou déjà dépassé est toujours affiché, même en défilement très rapide.
  */
 export default function Reveal({
   children,
@@ -33,36 +66,20 @@ export default function Reveal({
       return;
     }
 
-    // Affiché dès que l'élément est atteint (ou déjà dépassé) par le défilement.
-    // Plus fiable qu'un simple « est-il visible ? » : un élément traversé trop vite
-    // (défilement rapide, appareil lent, clic sur un lien du menu) ne reste jamais caché.
-    let frame = 0;
-    let done = false;
-
-    const stop = () => {
-      done = true;
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-      if (frame) cancelAnimationFrame(frame);
-    };
-
-    function check() {
-      frame = 0;
-      if (done || !el) return;
+    const check = () => {
       if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
         setVisible(true);
-        stop();
+        return true;
       }
-    }
+      return false;
+    };
 
-    function schedule() {
-      if (!frame) frame = requestAnimationFrame(check);
-    }
-
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    check();
-    return stop;
+    if (check()) return;
+    pending.add(check);
+    startListening();
+    return () => {
+      pending.delete(check);
+    };
   }, []);
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import SmartImage from "@/components/SmartImage";
 
 /**
  * Aperçu interactif d'un rapport (Power BI « publier sur le web », etc.).
@@ -31,7 +32,7 @@ export default function ReportEmbed({
       ) : (
         <div className="relative h-[320px] w-full">
           {imageUrl ? (
-            <img src={imageUrl} alt={title} className="absolute inset-0 h-full w-full object-cover" />
+            <SmartImage src={imageUrl} alt={title} fill sizes="(max-width: 1023px) 100vw, 480px" className="object-cover" />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-emerald-500/10">
               <svg className="absolute bottom-0 left-0 h-2/3 w-full opacity-45" viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true">

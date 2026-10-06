@@ -36,7 +36,7 @@ body {
   background-image:
     radial-gradient(1100px 560px at 6% -10%, rgba(77, 179, 255, 0.12), transparent 60%),
     radial-gradient(900px 480px at 100% 4%, rgba(129, 140, 248, 0.10), transparent 60%);
-  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 ::selection {
@@ -209,6 +209,7 @@ body {
 }
 .marquee-track {
   animation: marquee var(--dur, 42s) linear infinite;
+  will-change: transform;
 }
 .marquee-track--reverse {
   animation-direction: reverse;
@@ -468,5 +469,40 @@ body {
     opacity: 1;
     transform: none;
     filter: none;
+  }
+}
+
+/* ---------- Performance : version allégée sur mobile, tablette et écrans tactiles ----------
+   Le flou d'arrière-plan (backdrop-filter) et les flous animés sont très coûteux pour
+   un téléphone pendant le défilement : on les remplace par des fonds presque opaques. */
+@media (max-width: 1023px), (hover: none) {
+  .glass {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: linear-gradient(135deg, rgba(44, 58, 86, 0.97), rgba(35, 46, 68, 0.94));
+  }
+  .btn-ghost {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(35, 46, 68, 0.94);
+  }
+  /* barre de navigation */
+  .backdrop-blur-xl {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background-color: rgba(27, 36, 53, 0.97) !important;
+  }
+  /* apparitions : fondu + déplacement, sans flou */
+  .reveal {
+    transition:
+      opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .reveal[data-visible="false"] {
+    filter: none;
+  }
+  /* badges du hero : pas de flottement en continu */
+  .badge-float {
+    animation: none;
   }
 }
