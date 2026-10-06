@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import type {
-  Architecture,
   Certificate,
   Education,
   Experience,
@@ -14,7 +13,6 @@ import MobileMenu from "@/components/MobileMenu";
 import ArchitectureFlow from "@/components/ArchitectureFlow";
 import ReportEmbed from "@/components/ReportEmbed";
 import ZoomImage from "@/components/ZoomImage";
-import StarSchemaSvg from "@/components/StarSchemaSvg";
 import HeroDashboardBg from "@/components/HeroDashboardBg";
 import { TechIcon } from "@/components/TechIcon";
 
@@ -28,7 +26,6 @@ const NAV = [
   ["about", "À propos"],
   ["stack", "Technologies"],
   ["projects", "Projets"],
-  ["architecture", "Architecture"],
   ["parcours", "Parcours"],
   ["certificates", "Certificats"],
   ["contact", "Contact"]
@@ -87,7 +84,7 @@ function pickBalanced(byCategory: Record<string, Skill[]>, max: number) {
   return picked;
 }
 
-function SectionHeading({ title, subtitle, center = false }: { title: string; subtitle?: string; center?: boolean }) {
+function SectionHeading({ title, subtitle, center = true }: { title: string; subtitle?: string; center?: boolean }) {
   return (
     <div className={center ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
       <h2 className="section-title font-display text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
@@ -103,7 +100,6 @@ export default async function Home() {
     { data: profile },
     { data: skills },
     { data: projects },
-    { data: architectures },
     { data: experiences },
     { data: education },
     { data: certificates }
@@ -111,7 +107,6 @@ export default async function Home() {
     supabase.from("profile").select("*").eq("id", 1).single(),
     supabase.from("skills").select("*").order("category").order("sort_order"),
     supabase.from("projects").select("*").order("sort_order"),
-    supabase.from("architectures").select("*").order("sort_order"),
     supabase.from("experiences").select("*").order("sort_order"),
     supabase.from("education").select("*").order("sort_order"),
     supabase.from("certificates").select("*").order("sort_order")
@@ -120,7 +115,6 @@ export default async function Home() {
   const p = (profile as Profile) ?? null;
   const allSkills = (skills as Skill[]) ?? [];
   const projectList = (projects as Project[]) ?? [];
-  const architectureList = (architectures as Architecture[]) ?? [];
   const experienceList = (experiences as Experience[]) ?? [];
   const educationList = (education as Education[]) ?? [];
   const certificateList = (certificates as Certificate[]) ?? [];
@@ -337,26 +331,12 @@ export default async function Home() {
 
       {/* ================= Compétences par domaine : fiche technique ================= */}
       <section id="skills" className="w-full border-b border-line">
-        <div className="container-x grid gap-12 py-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.3fr)] lg:items-start">
-          <Reveal className="lg:sticky lg:top-28" variant="left">
-            <SectionHeading
-              title="Compétences par domaine"
-              subtitle="Business Intelligence, ingénierie des données, langages et visualisation."
-            />
-            <div className="mt-8 flex gap-4">
-              {[
-                [Object.keys(skillsByCategory).length, "domaines"],
-                [uniqueSkillNames.length, "compétences"]
-              ].map(([value, label]) => (
-                <div key={label} className="tile-hover cursor-default rounded-2xl border border-line bg-surface/60 px-5 py-4">
-                  <p className="gradient-text font-display text-3xl font-bold">{value}</p>
-                  <p className="mt-1 text-sm text-muted">{label}</p>
-                </div>
-              ))}
-            </div>
+        <div className="container-x py-24">
+          <Reveal>
+            <SectionHeading title="Compétences par domaine" />
           </Reveal>
 
-          <div className="glass overflow-hidden rounded-3xl">
+          <div className="glass mx-auto mt-12 max-w-5xl overflow-hidden rounded-3xl">
             {Object.entries(skillsByCategory).map(([category, items], i) => {
               const accent = ACCENTS[i % ACCENTS.length];
               return (
@@ -515,41 +495,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ================= Modélisation & architecture ================= */}
-      <section id="architecture" className="w-full border-b border-line">
-        <div className="container-x py-24">
-          <Reveal>
-            <SectionHeading
-              title="Modélisation & architecture data"
-              subtitle="Schémas en étoile, modèles dimensionnels et pipelines de données."
-            />
-          </Reveal>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {architectureList.map((a, i) => (
-              <Reveal key={a.id} delay={i * 120} variant={i % 2 === 0 ? "left" : "right"}>
-                <article className="glass glass-hover h-full overflow-hidden rounded-3xl">
-                  <div className="h-60 overflow-hidden border-b border-line bg-ink/40">
-                    {a.image_url ? (
-                      <ZoomImage src={a.image_url} alt={a.title} className="h-60 w-full object-contain p-2" />
-                    ) : (
-                      <div className="grid h-full place-items-center p-6">
-                        <StarSchemaSvg />
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-6">
-                    {a.kind && <p className="text-sm font-semibold text-emerald-300">{a.kind}</p>}
-                    <h3 className="mt-1 font-display text-lg font-bold text-text">{a.title}</h3>
-                    {a.description && <p className="mt-2 text-sm leading-relaxed text-muted">{a.description}</p>}
-                  </div>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ================= Parcours ================= */}
       <section id="parcours" className="w-full border-b border-line bg-surface2/60">
         <div className="container-x py-24">
@@ -613,9 +558,9 @@ export default async function Home() {
           <Reveal>
             <SectionHeading title="Certificats & badges" />
           </Reveal>
-          <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="mx-auto mt-12 flex max-w-5xl flex-wrap justify-center gap-4">
             {certificateList.map((c, i) => (
-              <Reveal key={c.id} delay={i * 100} variant="zoom">
+              <Reveal key={c.id} delay={i * 100} variant="zoom" className="w-[calc(50%-0.5rem)] sm:w-56">
                 <a
                   href={c.credential_url || undefined}
                   target="_blank"

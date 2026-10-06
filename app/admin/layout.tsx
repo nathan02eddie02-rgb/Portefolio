@@ -6,7 +6,6 @@ const links = [
   ["/admin/profile", "Profil & Hero"],
   ["/admin/skills", "Compétences"],
   ["/admin/projects", "Projets"],
-  ["/admin/architectures", "Architectures"],
   ["/admin/experience", "Expérience"],
   ["/admin/education", "Formation"],
   ["/admin/certificates", "Certificats"]
