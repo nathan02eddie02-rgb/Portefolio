@@ -8,8 +8,16 @@
 
 html {
   scroll-behavior: smooth;
-  font-size: 17px;
+  /* Ordinateur : rendu équivalent à l'ancien affichage zoomé à 80 % (17px × 0,8) */
+  font-size: 13.6px;
 }
+/* Tablette : un peu plus grand pour rester lisible */
+@media (max-width: 1023px) {
+  html {
+    font-size: 15px;
+  }
+}
+/* Mobile */
 @media (max-width: 640px) {
   html {
     font-size: 16px;
@@ -44,7 +52,7 @@ body {
 /* Conteneur large : marges latérales réduites */
 .container-x {
   width: 100%;
-  max-width: 1560px;
+  max-width: 1248px; /* 1560px × 0,8 */
   margin-inline: auto;
   padding-inline: clamp(0.875rem, 2vw, 1.75rem);
 }
